@@ -1,9 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Box } from "./screens/Box";
+import { App } from "./App";
+import "./index.css";
 
 createRoot(document.getElementById("app") as HTMLElement).render(
   <StrictMode>
-    <Box />
+    <App />
   </StrictMode>,
 );
