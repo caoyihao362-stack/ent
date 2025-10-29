@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { LoginPage } from './components/Auth/LoginPage';
 import { Questionnaire } from './components/Onboarding/Questionnaire';
 import { Dashboard } from './components/Dashboard/Dashboard';
@@ -13,11 +14,12 @@ import { SettingsPage } from './components/Profile/SettingsPage';
 import { SettingsDetail } from './components/Profile/SettingsDetail';
 import { HelpSupportPage } from './components/Profile/HelpSupportPage';
 import { PrivacyPolicyPage } from './components/Profile/PrivacyPolicyPage';
+import { AboutPage } from './components/Profile/AboutPage';
 import { BottomNav } from './components/Layout/BottomNav';
 import { supabase } from './lib/supabase';
 
 type Tab = 'dashboard' | 'ai-coach' | 'community' | 'profile';
-type ProfilePage = 'main' | 'personal-info' | 'badges' | 'settings' | 'help' | 'privacy';
+type ProfilePage = 'main' | 'personal-info' | 'badges' | 'settings' | 'help' | 'privacy' | 'about';
 type SettingsType = 'notifications' | 'security' | 'devices' | 'language';
 
 const AppContent = () => {
@@ -143,6 +145,8 @@ const AppContent = () => {
             <HelpSupportPage onBack={handleBackToProfile} />
           ) : profilePage === 'privacy' ? (
             <PrivacyPolicyPage onBack={handleBackToProfile} />
+          ) : profilePage === 'about' ? (
+            <AboutPage onBack={handleBackToProfile} />
           ) : (
             <ProfileCenter onNavigate={handleProfileNavigation} />
           )}
@@ -157,7 +161,9 @@ const AppContent = () => {
 export const App = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
     </AuthProvider>
   );
 };

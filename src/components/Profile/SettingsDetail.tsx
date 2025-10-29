@@ -3,6 +3,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { LanguageSettings } from './settings/LanguageSettings';
 
 interface SettingsDetailProps {
   settingType: 'notifications' | 'security' | 'devices' | 'language';
@@ -24,7 +25,6 @@ export const SettingsDetail = ({ settingType, onBack }: SettingsDetailProps) => 
     confirmPassword: '',
   });
 
-  const [selectedLanguage, setSelectedLanguage] = useState('zh-CN');
 
   const toggleNotification = (key: keyof typeof notificationSettings) => {
     setNotificationSettings((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -129,38 +129,7 @@ export const SettingsDetail = ({ settingType, onBack }: SettingsDetailProps) => 
     </Card>
   );
 
-  const renderLanguage = () => (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-gray-900">语言设置</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {[
-          { code: 'zh-CN', label: '简体中文' },
-          { code: 'zh-TW', label: '繁體中文' },
-          { code: 'en-US', label: 'English' },
-        ].map((lang) => (
-          <button
-            key={lang.code}
-            onClick={() => setSelectedLanguage(lang.code)}
-            className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-              selectedLanguage === lang.code
-                ? 'border-purple-600 bg-purple-50'
-                : 'border-gray-200 hover:border-purple-300'
-            }`}
-          >
-            <span
-              className={`font-medium ${
-                selectedLanguage === lang.code ? 'text-purple-700' : 'text-gray-900'
-              }`}
-            >
-              {lang.label}
-            </span>
-          </button>
-        ))}
-      </CardContent>
-    </Card>
-  );
+  const renderLanguage = () => <LanguageSettings />;
 
   const titles = {
     notifications: '通知设置',

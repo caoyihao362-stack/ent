@@ -52,6 +52,7 @@ export const ProfileCenter = ({ onNavigate }: ProfileCenterProps) => {
     { id: 'settings', icon: '/settings.svg', label: '设置', description: '通知、隐私和更多' },
     { id: 'help', icon: '/circle-help.svg', label: '帮助与支持', description: '常见问题和联系客服' },
     { id: 'privacy', icon: '/shield.svg', label: '隐私政策', description: '了解我们如何保护您的数据' },
+    { id: 'about', icon: '/info.svg', label: '关于 MoveMate', description: '版本信息和更新历史' },
   ];
 
   return (

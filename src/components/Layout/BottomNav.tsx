@@ -1,14 +1,18 @@
+import { useLanguage } from '../../contexts/LanguageContext';
+
 interface BottomNavProps {
   currentTab: 'dashboard' | 'ai-coach' | 'community' | 'profile';
   onTabChange: (tab: 'dashboard' | 'ai-coach' | 'community' | 'profile') => void;
 }
 
 export const BottomNav = ({ currentTab, onTabChange }: BottomNavProps) => {
+  const { t } = useLanguage();
+
   const tabs = [
-    { id: 'dashboard' as const, icon: '/dumbbell.svg', label: '体育' },
-    { id: 'ai-coach' as const, icon: '/brain-cog.svg', label: 'AI教练' },
-    { id: 'community' as const, icon: '/users.svg', label: '社区' },
-    { id: 'profile' as const, icon: '/user.svg', label: '我的' },
+    { id: 'dashboard' as const, icon: '/dumbbell.svg', label: t.nav.dashboard },
+    { id: 'ai-coach' as const, icon: '/brain-cog.svg', label: t.nav.aiCoach },
+    { id: 'community' as const, icon: '/users.svg', label: t.nav.community },
+    { id: 'profile' as const, icon: '/user.svg', label: t.nav.profile },
   ];
 
   return (

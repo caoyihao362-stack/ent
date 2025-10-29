@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../lib/supabase';
+import { generateSeedData } from '../../lib/seedData';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -17,20 +19,13 @@ const SPORTS_OPTIONS = [
   { id: 'hiking', label: '徒步', icon: '🥾' },
 ];
 
-const FREQUENCY_OPTIONS = [
-  { value: 1, label: '每周1次' },
-  { value: 2, label: '每周2次' },
-  { value: 3, label: '每周3次' },
-  { value: 4, label: '每周4次' },
-  { value: 5, label: '每周5次及以上' },
-];
-
 interface QuestionnaireProps {
   onComplete: () => void;
 }
 
 export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
@@ -38,6 +33,7 @@ export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
   const [fitnessGoal, setFitnessGoal] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const toggleSport = (sportId: string) => {
     setSelectedSports((prev) =>
@@ -47,37 +43,80 @@ export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
     );
   };
 
+  const validateInputs = (): boolean => {
+    if (frequency < 0 || frequency > 7) {
+      setValidationError(t.questionnaire.validation.frequencyRange);
+      return false;
+    }
+
+    const heightNum = parseFloat(height);
+    if (height && (heightNum < 100 || heightNum > 230)) {
+      setValidationError(t.questionnaire.validation.heightRange);
+      return false;
+    }
+
+    const weightNum = parseFloat(weight);
+    if (weight && (weightNum < 30 || weightNum > 200)) {
+      setValidationError(t.questionnaire.validation.weightRange);
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (selectedSports.length === 0) {
-      setError('请至少选择一项运动偏好');
+      setError(t.questionnaire.selectSportsError);
+      return;
+    }
+
+    if (!validateInputs()) {
       return;
     }
 
     setLoading(true);
     setError('');
+    setValidationError(null);
 
     try {
-      const { error: insertError } = await supabase.from('user_preferences').insert([
-        {
-          user_id: user?.id,
-          sports_preferences: selectedSports,
-          height: parseFloat(height) || 0,
-          weight: parseFloat(weight) || 0,
-          weekly_frequency: frequency,
-          fitness_goal: fitnessGoal,
-        },
-      ]);
+      const preferences = {
+        user_id: user?.id,
+        sports_preferences: selectedSports,
+        height: parseFloat(height) || 0,
+        weight: parseFloat(weight) || 0,
+        weekly_frequency: frequency,
+        fitness_goal: fitnessGoal,
+      };
+
+      const { error: insertError } = await supabase
+        .from('user_preferences')
+        .insert([preferences]);
 
       if (insertError) throw insertError;
 
+      await generateSeedData(user?.id || '', preferences);
+
       onComplete();
     } catch (err: any) {
-      setError(err.message || '保存失败，请重试');
+      setError(err.message || t.questionnaire.selectSportsError);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleValidationDismiss = () => {
+    setValidationError(null);
+  };
+
+  const FREQUENCY_OPTIONS = [
+    { value: 1, label: t.questionnaire.frequencyOptions[1] },
+    { value: 2, label: t.questionnaire.frequencyOptions[2] },
+    { value: 3, label: t.questionnaire.frequencyOptions[3] },
+    { value: 4, label: t.questionnaire.frequencyOptions[4] },
+    { value: 5, label: t.questionnaire.frequencyOptions[5] },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 p-4 pb-24 overflow-y-auto">
@@ -85,19 +124,19 @@ export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
         <Card className="shadow-xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-gray-900">
-              完善个人信息
+              {t.questionnaire.title}
             </CardTitle>
             <p className="text-sm text-gray-600 mt-2">
-              帮助我们了解您的运动偏好，为您提供个性化服务
+              {t.questionnaire.subtitle}
             </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-4">
                 <Label className="text-lg font-semibold text-gray-900">
-                  运动偏好
+                  {t.questionnaire.sportsPreferences}
                   <span className="text-sm font-normal text-gray-500 ml-2">
-                    (可多选)
+                    {t.questionnaire.multiSelect}
                   </span>
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -129,18 +168,18 @@ export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
 
               <div className="space-y-4">
                 <Label className="text-lg font-semibold text-gray-900">
-                  身体情况
+                  {t.questionnaire.bodyInfo}
                 </Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="height" className="text-sm text-gray-700">
-                      身高 (cm)
+                      {t.questionnaire.height}
                     </Label>
                     <Input
                       id="height"
                       type="number"
                       step="0.1"
-                      placeholder="如：170"
+                      placeholder={t.questionnaire.heightPlaceholder}
                       value={height}
                       onChange={(e) => setHeight(e.target.value)}
                       className="text-base"
@@ -148,13 +187,13 @@ export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="weight" className="text-sm text-gray-700">
-                      体重 (kg)
+                      {t.questionnaire.weight}
                     </Label>
                     <Input
                       id="weight"
                       type="number"
                       step="0.1"
-                      placeholder="如：65"
+                      placeholder={t.questionnaire.weightPlaceholder}
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
                       className="text-base"
@@ -165,7 +204,7 @@ export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
 
               <div className="space-y-4">
                 <Label className="text-lg font-semibold text-gray-900">
-                  运动频率
+                  {t.questionnaire.frequency}
                 </Label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {FREQUENCY_OPTIONS.map((option) => (
@@ -195,12 +234,12 @@ export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
 
               <div className="space-y-4">
                 <Label htmlFor="goal" className="text-lg font-semibold text-gray-900">
-                  健身目标
+                  {t.questionnaire.fitnessGoal}
                 </Label>
                 <Input
                   id="goal"
                   type="text"
-                  placeholder="如：减重5公斤、提高耐力、增肌等"
+                  placeholder={t.questionnaire.goalPlaceholder}
                   value={fitnessGoal}
                   onChange={(e) => setFitnessGoal(e.target.value)}
                   className="text-base"
@@ -218,12 +257,34 @@ export const Questionnaire = ({ onComplete }: QuestionnaireProps) => {
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 py-6 text-base font-semibold"
                 disabled={loading}
               >
-                {loading ? '保存中...' : '完成设置'}
+                {loading ? t.questionnaire.saving : t.questionnaire.complete}
               </Button>
             </form>
           </CardContent>
         </Card>
       </div>
+
+      {validationError && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md shadow-2xl">
+            <CardHeader>
+              <CardTitle className="text-red-600 flex items-center gap-2">
+                <span className="text-2xl">⚠️</span>
+                {t.questionnaire.validation.invalidData}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-gray-700">{validationError}</p>
+              <Button
+                onClick={handleValidationDismiss}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+              >
+                {t.common.confirm}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
