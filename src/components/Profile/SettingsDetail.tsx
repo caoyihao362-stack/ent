@@ -3,6 +3,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { useLanguage, Language } from '../../contexts/LanguageContext';
 
 interface SettingsDetailProps {
   settingType: 'notifications' | 'security' | 'devices' | 'language';
@@ -10,6 +11,8 @@ interface SettingsDetailProps {
 }
 
 export const SettingsDetail = ({ settingType, onBack }: SettingsDetailProps) => {
+  const { language, setLanguage, t } = useLanguage();
+
   const [notificationSettings, setNotificationSettings] = useState({
     newMessage: true,
     communityUpdate: true,
@@ -23,8 +26,6 @@ export const SettingsDetail = ({ settingType, onBack }: SettingsDetailProps) => 
     newPassword: '',
     confirmPassword: '',
   });
-
-  const [selectedLanguage, setSelectedLanguage] = useState('zh-CN');
 
   const toggleNotification = (key: keyof typeof notificationSettings) => {
     setNotificationSettings((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -129,38 +130,59 @@ export const SettingsDetail = ({ settingType, onBack }: SettingsDetailProps) => 
     </Card>
   );
 
-  const renderLanguage = () => (
-    <Card className="shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-gray-900">语言设置</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {[
-          { code: 'zh-CN', label: '简体中文' },
-          { code: 'zh-TW', label: '繁體中文' },
-          { code: 'en-US', label: 'English' },
-        ].map((lang) => (
-          <button
-            key={lang.code}
-            onClick={() => setSelectedLanguage(lang.code)}
-            className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-              selectedLanguage === lang.code
-                ? 'border-purple-600 bg-purple-50'
-                : 'border-gray-200 hover:border-purple-300'
-            }`}
-          >
-            <span
-              className={`font-medium ${
-                selectedLanguage === lang.code ? 'text-purple-700' : 'text-gray-900'
+  const renderLanguage = () => {
+    const languages: { code: Language; label: string }[] = [
+      { code: 'zh-CN', label: t('simplified_chinese') },
+      { code: 'zh-TW', label: t('traditional_chinese') },
+      { code: 'en', label: t('english') },
+    ];
+
+    return (
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-gray-900">{t('language_settings')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => setLanguage(lang.code)}
+              className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                language === lang.code
+                  ? 'border-purple-600 bg-purple-50'
+                  : 'border-gray-200 hover:border-purple-300'
               }`}
             >
-              {lang.label}
-            </span>
-          </button>
-        ))}
-      </CardContent>
-    </Card>
-  );
+              <div className="flex items-center justify-between">
+                <span
+                  className={`font-medium ${
+                    language === lang.code ? 'text-purple-700' : 'text-gray-900'
+                  }`}
+                >
+                  {lang.label}
+                </span>
+                {language === lang.code && (
+                  <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center">
+                    <svg
+                      className="w-3 h-3 text-white"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                )}
+              </div>
+            </button>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const titles = {
     notifications: '通知设置',
@@ -177,8 +199,8 @@ export const SettingsDetail = ({ settingType, onBack }: SettingsDetailProps) => 
             onClick={onBack}
             className="flex items-center gap-2 text-purple-600 hover:text-purple-700"
           >
-            <img src="/chevron-right.svg" alt="返回" className="w-5 h-5 rotate-180" />
-            <span className="font-medium">返回</span>
+            <img src="/chevron-right.svg" alt={t('back')} className="w-5 h-5 rotate-180" />
+            <span className="font-medium">{t('back')}</span>
           </button>
         </div>
 

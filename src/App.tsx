@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 import { LoginPage } from './components/Auth/LoginPage';
 import { Questionnaire } from './components/Onboarding/Questionnaire';
 import { Dashboard } from './components/Dashboard/Dashboard';
@@ -13,12 +14,15 @@ import { SettingsPage } from './components/Profile/SettingsPage';
 import { SettingsDetail } from './components/Profile/SettingsDetail';
 import { HelpSupportPage } from './components/Profile/HelpSupportPage';
 import { PrivacyPolicyPage } from './components/Profile/PrivacyPolicyPage';
+import { AboutPage } from './components/Profile/AboutPage';
+import { MessagesPage } from './components/Messages/MessagesPage';
+import { ChatDetail } from './components/Messages/ChatDetail';
 import { BottomNav } from './components/Layout/BottomNav';
 import { supabase } from './lib/supabase';
 
 type Tab = 'dashboard' | 'ai-coach' | 'community' | 'profile';
-type ProfilePage = 'main' | 'personal-info' | 'badges' | 'settings' | 'help' | 'privacy';
-type SettingsType = 'notifications' | 'security' | 'devices' | 'language';
+type ProfilePage = 'main' | 'personal-info' | 'badges' | 'settings' | 'help' | 'privacy' | 'about' | 'messages' | 'chat';
+type SettingsType = 'notifications' | 'security' | 'devices' | 'language' | 'about';
 
 const AppContent = () => {
   const { user, profile, loading } = useAuth();
@@ -27,6 +31,7 @@ const AppContent = () => {
   const [profilePage, setProfilePage] = useState<ProfilePage>('main');
   const [settingsType, setSettingsType] = useState<SettingsType | null>(null);
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
+  const [selectedChatUserId, setSelectedChatUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkUserPreferences();
@@ -56,11 +61,18 @@ const AppContent = () => {
   const handleProfileNavigation = (page: string) => {
     if (page === 'settings') {
       setProfilePage('settings');
-    } else if (['notifications', 'security', 'devices', 'language'].includes(page)) {
+    } else if (page === 'messages') {
+      setProfilePage('messages');
+    } else if (['notifications', 'security', 'devices', 'language', 'about'].includes(page)) {
       setSettingsType(page as SettingsType);
     } else {
       setProfilePage(page as ProfilePage);
     }
+  };
+
+  const handleChatSelect = (userId: string) => {
+    setSelectedChatUserId(userId);
+    setProfilePage('chat');
   };
 
   const handleCommunitySelect = (communityId: string) => {
@@ -72,8 +84,13 @@ const AppContent = () => {
   };
 
   const handleBackToProfile = () => {
-    setProfilePage('main');
-    setSettingsType(null);
+    if (profilePage === 'chat') {
+      setProfilePage('messages');
+      setSelectedChatUserId(null);
+    } else {
+      setProfilePage('main');
+      setSettingsType(null);
+    }
   };
 
   const handleTabChange = (tab: Tab) => {
@@ -124,10 +141,14 @@ const AppContent = () => {
       {currentTab === 'profile' && (
         <>
           {settingsType ? (
-            <SettingsDetail
-              settingType={settingsType}
-              onBack={handleBackToProfile}
-            />
+            settingsType === 'about' ? (
+              <AboutPage onBack={handleBackToProfile} />
+            ) : (
+              <SettingsDetail
+                settingType={settingsType}
+                onBack={handleBackToProfile}
+              />
+            )
           ) : profilePage === 'main' ? (
             <ProfileCenter onNavigate={handleProfileNavigation} />
           ) : profilePage === 'personal-info' ? (
@@ -143,6 +164,10 @@ const AppContent = () => {
             <HelpSupportPage onBack={handleBackToProfile} />
           ) : profilePage === 'privacy' ? (
             <PrivacyPolicyPage onBack={handleBackToProfile} />
+          ) : profilePage === 'messages' ? (
+            <MessagesPage onBack={handleBackToProfile} onChatSelect={handleChatSelect} />
+          ) : profilePage === 'chat' ? (
+            <ChatDetail userId={selectedChatUserId || ''} onBack={handleBackToProfile} />
           ) : (
             <ProfileCenter onNavigate={handleProfileNavigation} />
           )}
@@ -156,8 +181,10 @@ const AppContent = () => {
 
 export const App = () => {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </LanguageProvider>
   );
 };

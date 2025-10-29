@@ -31,6 +31,46 @@ export const AICoach = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const generateMockConversations = (): Message[] => {
+    const now = new Date();
+    const mockConversations = [
+      {
+        userMsg: '你好！我想开始健身，但不知道从哪里开始。',
+        aiMsg: '您好！很高兴您决定开始健身之旅！对于初学者，我建议：\n\n1. 先从简单的有氧运动开始，如快走、慢跑或游泳\n2. 每周训练3-4次，每次30-45分钟\n3. 逐步加入力量训练，使用自重训练或轻量哑铃\n4. 确保充足的休息和恢复时间\n\n您想重点发展哪方面呢？',
+        timeOffset: 48,
+      },
+      {
+        userMsg: '我想增肌，应该怎么安排训练计划？',
+        aiMsg: '很好的目标！增肌需要系统的训练计划。建议：\n\n训练安排：\n- 每周4-5次力量训练\n- 采用分化训练：胸+三头、背+二头、腿部+肩部\n- 每个动作3-4组，每组8-12次\n- 组间休息60-90秒\n\n营养建议：\n- 热量盈余：比维持热量多300-500卡\n- 蛋白质：每公斤体重摄入1.6-2.2克\n- 训练后30分钟内补充蛋白质\n\n记得保证充足睡眠，肌肉在休息时生长！',
+        timeOffset: 47,
+      },
+      {
+        userMsg: '运动后应该吃什么比较好？',
+        aiMsg: '运动后的营养补充很重要！建议：\n\n运动后30-60分钟内：\n🥤 蛋白质补充：\n- 鸡胸肉、鱼类、鸡蛋\n- 或蛋白粉奶昔\n\n🍌 碳水化合物：\n- 香蕉、燕麦、红薯\n- 帮助恢复糖原储备\n\n💧 水分补充：\n- 充足的水或运动饮料\n- 补充流失的电解质\n\n避免：高脂肪食物（会影响吸收）和酒精（影响恢复）',
+        timeOffset: 24,
+      },
+    ];
+
+    const messages: Message[] = [];
+    mockConversations.forEach((conv, idx) => {
+      const timestamp = new Date(now.getTime() - conv.timeOffset * 60 * 60 * 1000);
+      messages.push({
+        id: `mock-${idx}-user`,
+        role: 'user',
+        content: conv.userMsg,
+        timestamp,
+      });
+      messages.push({
+        id: `mock-${idx}-assistant`,
+        role: 'assistant',
+        content: conv.aiMsg,
+        timestamp: new Date(timestamp.getTime() + 30000),
+      });
+    });
+
+    return messages;
+  };
+
   const loadConversationHistory = async () => {
     if (!user) return;
 
@@ -43,6 +83,7 @@ export const AICoach = () => {
 
     if (error) {
       console.error('Error loading conversations:', error);
+      setMessages(generateMockConversations());
       return;
     }
 
@@ -62,7 +103,11 @@ export const AICoach = () => {
       });
     });
 
-    setMessages(historicalMessages);
+    if (historicalMessages.length === 0) {
+      setMessages(generateMockConversations());
+    } else {
+      setMessages(historicalMessages);
+    }
   };
 
   const generateAIResponse = async (userMessage: string): Promise<string> => {

@@ -100,6 +100,39 @@ export const CommunityDetail = ({ communityId, onBack }: CommunityDetailProps) =
     }
   };
 
+  const generateMockPosts = (): CommunityPost[] => {
+    const now = new Date();
+    const mockUsers = [
+      '健身达人', '跑步爱好者', '瑜伽小姐姐', '游泳健将', '力量训练者',
+      '马拉松跑者', '户外运动家', '健康生活者'
+    ];
+
+    const postTemplates = [
+      '今天完成了5公里晨跑，感觉特别好！坚持就是胜利 💪',
+      '分享一下我的增肌计划，已经坚持三个月了，效果很明显！',
+      '请教各位大神，深蹲的时候膝盖应该注意什么？',
+      '刚打完一场羽毛球，出了一身汗，太舒服了！',
+      '今天游泳1000米，感觉体能有所提升 🏊',
+      '早上瑜伽课结束，身心都得到了放松 🧘',
+      '周末爬山计划，有没有一起的小伙伴？',
+      '分享一下我的健康餐食谱，营养均衡又美味！',
+    ];
+
+    return postTemplates.slice(0, 5).map((content, index) => ({
+      id: `mock-post-${index}`,
+      community_id: communityId,
+      user_id: `mock-user-${index}`,
+      content,
+      image_url: '',
+      likes_count: Math.floor(Math.random() * 50) + 5,
+      created_at: new Date(now.getTime() - (index + 1) * 3600000).toISOString(),
+      user_profiles: {
+        username: mockUsers[index % mockUsers.length],
+        avatar_url: '',
+      },
+    }));
+  };
+
   const loadPosts = async () => {
     const { data, error } = await supabase
       .from('community_posts')
@@ -110,10 +143,15 @@ export const CommunityDetail = ({ communityId, onBack }: CommunityDetailProps) =
 
     if (error) {
       console.error('Error loading posts:', error);
+      setPosts(generateMockPosts());
       return;
     }
 
-    setPosts(data || []);
+    if (!data || data.length === 0) {
+      setPosts(generateMockPosts());
+    } else {
+      setPosts(data);
+    }
   };
 
   const handleJoinCommunity = async () => {

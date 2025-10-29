@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Separator } from '../ui/separator';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface SettingsPageProps {
   onBack: () => void;
@@ -7,30 +8,38 @@ interface SettingsPageProps {
 }
 
 export const SettingsPage = ({ onBack, onNavigate }: SettingsPageProps) => {
+  const { t } = useLanguage();
+
   const settingsItems = [
     {
       id: 'notifications',
       icon: '/bell.svg',
-      label: '通知设置',
-      description: '管理推送通知偏好',
+      label: t('notifications_settings'),
+      description: t('notifications_desc'),
     },
     {
       id: 'security',
       icon: '/lock.svg',
-      label: '账户安全',
-      description: '修改密码和安全设置',
+      label: t('account_security'),
+      description: t('security_desc'),
     },
     {
       id: 'devices',
       icon: '/container.svg',
-      label: '设备绑定',
-      description: '管理已绑定的设备',
+      label: t('device_binding'),
+      description: t('devices_desc'),
     },
     {
       id: 'language',
       icon: '/info.svg',
-      label: '语言设置',
-      description: '切换应用显示语言',
+      label: t('language_settings'),
+      description: t('language_desc'),
+    },
+    {
+      id: 'about',
+      icon: '/info.svg',
+      label: t('about'),
+      description: t('about_desc'),
     },
   ];
 
@@ -42,15 +51,15 @@ export const SettingsPage = ({ onBack, onNavigate }: SettingsPageProps) => {
             onClick={onBack}
             className="flex items-center gap-2 text-purple-600 hover:text-purple-700"
           >
-            <img src="/chevron-right.svg" alt="返回" className="w-5 h-5 rotate-180" />
-            <span className="font-medium">返回</span>
+            <img src="/chevron-right.svg" alt={t('back')} className="w-5 h-5 rotate-180" />
+            <span className="font-medium">{t('back')}</span>
           </button>
         </div>
 
         <div className="p-4">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-gray-900">设置</CardTitle>
+              <CardTitle className="text-gray-900">{t('settings')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {settingsItems.map((item, index) => (

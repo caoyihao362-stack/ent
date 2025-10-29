@@ -48,6 +48,7 @@ export const ProfileCenter = ({ onNavigate }: ProfileCenterProps) => {
 
   const menuItems = [
     { id: 'personal-info', icon: '/user-1.svg', label: '个人资料', description: '查看和编辑个人信息' },
+    { id: 'messages', icon: '/message-square.svg', label: '私信', description: '查看和回复消息' },
     { id: 'badges', icon: '/award.svg', label: '我的徽章', description: `已获得 ${badges.length} 个徽章` },
     { id: 'settings', icon: '/settings.svg', label: '设置', description: '通知、隐私和更多' },
     { id: 'help', icon: '/circle-help.svg', label: '帮助与支持', description: '常见问题和联系客服' },

@@ -39,6 +39,35 @@ export const Dashboard = () => {
     }
   };
 
+  const generateMockActivities = (): Activity[] => {
+    const days = timeRange === 'day' ? 1 : timeRange === 'week' ? 7 : 30;
+    const mockData: Activity[] = [];
+
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+
+      const baseSteps = 8000 + Math.floor(Math.random() * 6000);
+      const steps = Math.floor(baseSteps + Math.sin(i * 0.5) * 2000);
+      const distance = steps * 0.00075;
+
+      mockData.push({
+        id: `mock-${i}`,
+        user_id: user?.id || '',
+        activity_type: 'walking',
+        activity_date: dateStr,
+        steps,
+        distance: parseFloat(distance.toFixed(2)),
+        duration: Math.floor(steps / 100),
+        calories: Math.floor(steps * 0.04),
+        created_at: date.toISOString(),
+      });
+    }
+
+    return mockData;
+  };
+
   const loadActivities = async () => {
     const days = timeRange === 'day' ? 1 : timeRange === 'week' ? 7 : 30;
     const startDate = new Date();
@@ -52,7 +81,37 @@ export const Dashboard = () => {
       .order('activity_date', { ascending: true });
 
     if (error) throw error;
-    setActivities(data || []);
+
+    if (!data || data.length === 0) {
+      setActivities(generateMockActivities());
+    } else {
+      setActivities(data);
+    }
+  };
+
+  const generateMockLeaderboard = (): LeaderboardEntry[] => {
+    const mockUsers = [
+      { username: '健身达人', steps: 95000 },
+      { username: '晨跑爱好者', steps: 88000 },
+      { username: profile?.username || '我', steps: 82000, isCurrentUser: true },
+      { username: '运动狂热者', steps: 78000 },
+      { username: '马拉松跑者', steps: 72000 },
+      { username: '健康生活家', steps: 68000 },
+      { username: '步行达人', steps: 65000 },
+      { username: '运动新星', steps: 61000 },
+      { username: '健身教练', steps: 58000 },
+      { username: '活力青年', steps: 55000 },
+    ];
+
+    return mockUsers
+      .sort((a, b) => b.steps - a.steps)
+      .map((user, index) => ({
+        id: user.isCurrentUser ? (user?.id || 'current-user') : `mock-user-${index}`,
+        username: user.username,
+        avatar_url: '',
+        total_steps: user.steps,
+        rank: index + 1,
+      }));
   };
 
   const loadLeaderboard = async () => {
@@ -97,7 +156,11 @@ export const Dashboard = () => {
       .slice(0, 10)
       .map((entry, index) => ({ ...entry, rank: index + 1 }));
 
-    setLeaderboard(leaderboardData);
+    if (leaderboardData.length === 0) {
+      setLeaderboard(generateMockLeaderboard());
+    } else {
+      setLeaderboard(leaderboardData);
+    }
   };
 
   const chartData = activities.map((activity) => ({
