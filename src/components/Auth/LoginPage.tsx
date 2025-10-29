@@ -42,7 +42,7 @@ export const LoginPage = () => {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            体育分享 SportsShare
+            MoveMate
           </CardTitle>
           <p className="text-gray-600 text-sm">连接运动爱好者的社交平台</p>
         </CardHeader>

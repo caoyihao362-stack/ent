@@ -5,7 +5,11 @@ import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Separator } from '../ui/separator';
 
-export const ProfileCenter = () => {
+interface ProfileCenterProps {
+  onNavigate?: (page: string) => void;
+}
+
+export const ProfileCenter = ({ onNavigate }: ProfileCenterProps) => {
   const { user, profile, signOut } = useAuth();
   const [badges, setBadges] = useState<BadgeType[]>([]);
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
@@ -43,11 +47,11 @@ export const ProfileCenter = () => {
   };
 
   const menuItems = [
-    { icon: '/user-1.svg', label: '个人资料', description: '查看和编辑个人信息' },
-    { icon: '/award.svg', label: '我的徽章', description: `已获得 ${badges.length} 个徽章` },
-    { icon: '/settings.svg', label: '设置', description: '通知、隐私和更多' },
-    { icon: '/circle-help.svg', label: '帮助与支持', description: '常见问题和联系客服' },
-    { icon: '/shield.svg', label: '隐私政策', description: '了解我们如何保护您的数据' },
+    { id: 'personal-info', icon: '/user-1.svg', label: '个人资料', description: '查看和编辑个人信息' },
+    { id: 'badges', icon: '/award.svg', label: '我的徽章', description: `已获得 ${badges.length} 个徽章` },
+    { id: 'settings', icon: '/settings.svg', label: '设置', description: '通知、隐私和更多' },
+    { id: 'help', icon: '/circle-help.svg', label: '帮助与支持', description: '常见问题和联系客服' },
+    { id: 'privacy', icon: '/shield.svg', label: '隐私政策', description: '了解我们如何保护您的数据' },
   ];
 
   return (
@@ -159,7 +163,10 @@ export const ProfileCenter = () => {
             <CardContent className="p-0">
               {menuItems.map((item, index) => (
                 <div key={index}>
-                  <button className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors duration-200 text-left">
+                  <button
+                    onClick={() => onNavigate?.(item.id)}
+                    className="w-full p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors duration-200 text-left"
+                  >
                     <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
                       <img src={item.icon} alt={item.label} className="w-5 h-5" />
                     </div>

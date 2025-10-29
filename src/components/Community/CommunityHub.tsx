@@ -9,7 +9,11 @@ import { Badge } from '../ui/badge';
 
 type ViewMode = 'communities' | 'messages';
 
-export const CommunityHub = () => {
+interface CommunityHubProps {
+  onCommunitySelect?: (communityId: string) => void;
+}
+
+export const CommunityHub = ({ onCommunitySelect }: CommunityHubProps) => {
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>('communities');
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -132,7 +136,11 @@ export const CommunityHub = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {communities.map((community) => (
-                <Card key={community.id} className="shadow-lg hover:shadow-xl transition-all duration-200">
+                <Card
+                  key={community.id}
+                  className="shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
+                  onClick={() => onCommunitySelect?.(community.id)}
+                >
                   <CardHeader>
                     <CardTitle className="text-lg text-gray-900">{community.name}</CardTitle>
                     <p className="text-sm text-gray-600 mt-1">{community.description}</p>
@@ -150,13 +158,6 @@ export const CommunityHub = () => {
                           </Badge>
                         ))}
                       </div>
-                      <Button
-                        onClick={() => handleJoinCommunity(community.id)}
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                        size="sm"
-                      >
-                        加入社群
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
