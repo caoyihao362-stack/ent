@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase, Activity } from '../../lib/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
@@ -17,6 +18,7 @@ type TimeRange = 'day' | 'week' | 'month';
 
 export const Dashboard = () => {
   const { user, profile } = useAuth();
+  const { t } = useLanguage();
   const [timeRange, setTimeRange] = useState<TimeRange>('week');
   const [activities, setActivities] = useState<Activity[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -114,20 +116,20 @@ export const Dashboard = () => {
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="text-center py-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            体育数据概览
+            {t.dashboard.title}
           </h1>
         </div>
 
         <div className="flex justify-center mb-4">
           <ToggleGroup type="single" value={timeRange} onValueChange={(v) => v && setTimeRange(v as TimeRange)}>
             <ToggleGroupItem value="day" className="data-[state=on]:bg-purple-600 data-[state=on]:text-white">
-              日
+              {t.dashboard.timeRange.day}
             </ToggleGroupItem>
             <ToggleGroupItem value="week" className="data-[state=on]:bg-purple-600 data-[state=on]:text-white">
-              周
+              {t.dashboard.timeRange.week}
             </ToggleGroupItem>
             <ToggleGroupItem value="month" className="data-[state=on]:bg-purple-600 data-[state=on]:text-white">
-              月
+              {t.dashboard.timeRange.month}
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -136,7 +138,7 @@ export const Dashboard = () => {
           <Card className="shadow-lg">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-gray-600 text-sm mb-2">总步数</p>
+                <p className="text-gray-600 text-sm mb-2">{t.dashboard.totalSteps}</p>
                 <p className="text-4xl font-bold text-purple-600">{totalSteps.toLocaleString()}</p>
               </div>
             </CardContent>
@@ -144,7 +146,7 @@ export const Dashboard = () => {
           <Card className="shadow-lg">
             <CardContent className="pt-6">
               <div className="text-center">
-                <p className="text-gray-600 text-sm mb-2">总距离 (km)</p>
+                <p className="text-gray-600 text-sm mb-2">{t.dashboard.totalDistance}</p>
                 <p className="text-4xl font-bold text-blue-600">{totalDistance.toFixed(2)}</p>
               </div>
             </CardContent>
@@ -153,7 +155,7 @@ export const Dashboard = () => {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-gray-900">运动数据趋势</CardTitle>
+            <CardTitle className="text-gray-900">{t.dashboard.trendChart}</CardTitle>
           </CardHeader>
           <CardContent>
             {chartData.length > 0 ? (
@@ -177,13 +179,13 @@ export const Dashboard = () => {
                     strokeWidth={3}
                     dot={{ fill: '#9333ea', r: 4 }}
                     activeDot={{ r: 6 }}
-                    name="步数"
+                    name={t.dashboard.steps}
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
               <div className="text-center py-12 text-gray-500">
-                暂无运动数据
+                {t.dashboard.noData}
               </div>
             )}
           </CardContent>
@@ -192,8 +194,8 @@ export const Dashboard = () => {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-gray-900 flex items-center gap-2">
-              <img src="/trophy.svg" alt="排行榜" className="w-6 h-6" />
-              运动排行榜
+              <img src="/trophy.svg" alt={t.dashboard.leaderboard} className="w-6 h-6" />
+              {t.dashboard.leaderboard}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -228,14 +230,14 @@ export const Dashboard = () => {
                       <p className="text-lg font-bold text-purple-600">
                         {entry.total_steps.toLocaleString()}
                       </p>
-                      <p className="text-xs text-gray-500">步</p>
+                      <p className="text-xs text-gray-500">{t.dashboard.steps}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
-                暂无排行数据
+                {t.dashboard.noLeaderboard}
               </div>
             )}
           </CardContent>
